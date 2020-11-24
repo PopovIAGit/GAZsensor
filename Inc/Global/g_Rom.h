@@ -19,6 +19,7 @@ typedef struct _TUserParam
 
 typedef struct _TFactoryParam
 {
+  Uns             Number;
   Uns             Time;
   Uns             Date;
   Uns             Sec;

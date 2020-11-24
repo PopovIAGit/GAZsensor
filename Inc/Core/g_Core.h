@@ -66,12 +66,16 @@ typedef struct {
 	TStatusReg 			Status;			// Статус работы
 	// ---
     
-        Uns                             Rsvd;
+        Uns                             MenuLvl;
+        Uns                             MenuSublvl;
 } TCore;
 
 void Core_Init(TCore *);
 
 void core18kHZupdate(void);
+void core200HZupdate(void);
+void coreMenu(void);
 
+extern TCore g_Core;
 #endif // CORE_
 

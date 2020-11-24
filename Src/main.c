@@ -41,13 +41,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc;
-
 I2C_HandleTypeDef hi2c1;
-
 SPI_HandleTypeDef hspi1;
-
 TIM_HandleTypeDef htim11;
-
 IRDA_HandleTypeDef hirda1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
@@ -73,6 +69,7 @@ void emptyFunc(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int a = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -82,12 +79,17 @@ int a = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
-  // displ - _ delit symbol
-  // menu - 
+  // tasks -------------------------------------------------------------------- 
+  // displ - _ готово - дисплей битый
+  // menu - заготовка есть, подключить реальные числа
   // memory - 
-  
-  
+  // btn - готово
+  // IK - 
+  // TemperADC - 
+  // TDC-GP30YA - 
+  // modbus - 
+  // jump (block factory param) - 
+  // end tasks-----------------------------------------------------------------
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -117,19 +119,28 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
-        HAL_GPIO_WritePin (V30_ON_GPIO_Port, V30_ON_Pin, 1); // on 30V
+  HAL_GPIO_WritePin (V30_ON_GPIO_Port, V30_ON_Pin, 1); // on 30V
        
-         peref_Init();
+  peref_Init();
+  Core_Init(&g_Core);
   
-  	HAL_TIM_Base_Start_IT (&htim11);
+  HAL_TIM_Base_Start_IT (&htim11);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+/*      tic_control_on();
+	tic_clear();
+	tic_print_char(lang, 1);
+        HAL_Delay (1);
+	tic_control_off();*/
+  
+    
     /* USER CODE END WHILE */
-    a++;
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

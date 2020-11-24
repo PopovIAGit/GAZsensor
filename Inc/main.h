@@ -33,6 +33,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "math.h"
+#include "delay.h"
 #include "std.h"
 #include "g_structs.h"
 #include "csl_memory.h"
@@ -121,7 +122,7 @@ void emptyFunc(void);
 #define V30_ON_Pin GPIO_PIN_5
 #define V30_ON_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+extern I2C_HandleTypeDef hi2c1;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

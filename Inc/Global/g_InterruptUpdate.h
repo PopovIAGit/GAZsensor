@@ -59,7 +59,7 @@ TPeriodicalFunction Task2kHz[] =          //Не более 8-х задач
 
 TPeriodicalFunction Task200Hz[] =       	//не более  20-ти задач
 {
-    PrdElemInit(emptyFunc,                NULL)
+    PrdElemInit(core200HZupdate,                NULL)
 };
 
 // ================================ 50 vц ==================================
