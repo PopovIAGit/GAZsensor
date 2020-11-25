@@ -13,6 +13,54 @@ uint16_t addr = 0;
 uint16_t addrstatus = 0;
 uint16_t count = 0;
 
+
+// Точки 		  Температура.  АЦП.            темпер.    №
+TDot dots[DOTS] = {	        0,      744,		//  4		0
+                                31,     842,            //  4.5
+                                62,     940,		//  5		1
+                                93,     1040,           //  5.5
+                                125,    1136,		//  6		2
+                                156,    1232,           //  6.5
+                                187,    1330,		//  7		3
+                                218,    1425,           //  7.5
+                                250,    1520,		//  8	        4
+                                281,    1614,           //  8.5
+                                312,    1710,		//  9	        5
+                                343,    1803,           //  9.5
+                                375,    1898,		//  10	        6
+                                406,    1993,           //  10.5
+                                437,    2085,		//  11          7
+                                468,    2183,           //  11.5
+                                500,    2276,		//  12          8
+                                531,    2373,           //  12.5
+                                562,    2465,		//  13  9
+                                593,    2560,           //  13.5
+                                625,    2655,		//  14  10
+                                656,    2751,           //  14.5
+                                687,    2845,		//  15  11
+                                718,    2939,           //  15.5
+                                750,    3033,		//  16  12
+                                781,    3128,           //  16.5
+                                812,    3221,		//  17  13
+                                843,    3317,           //  17.5
+                                875,    3409,		//  18  14
+                                906,    3506,           //  18.5
+                                937,    3598,		//  19  15
+                                968,    3695,           //  19.5
+                                1000,   3785};		//  20  16		
+//--------------------------------------------------------
+
+
+void peref_TemperObserverInit(TTempObserver *p)
+{
+                int i = 0;
+
+		 for (i = 0; i<DOTS; i++)
+		 {
+			p->dots[i] = dots[i];
+		 }              
+}
+
 void peref_Init(void)
 {	 
   // Память------------------------------------------------------------------------------------
@@ -23,11 +71,10 @@ void peref_Init(void)
   HAL_Delay (1);
   tic_control_off();
   // Часы---------------------------------------------------------------------------------------
-  
+  peref_TemperObserverInit(&g_Peref.temper);
   // var---------------------------------
   //---------------------------
-  
-  
+ 
   g_Ram.UserParam.Rsvd1 = 0;
 }
 
@@ -43,6 +90,9 @@ void peref_2KHzCalc(TPeref *p)
 
 void peref_50HzCalc(TPeref *p)
 { 
+  g_Peref.temper.input = HAL_ADC_GetValue(&hadc);
+  peref_TemperObserverUpdate(&g_Peref.temper);
+  g_Ram.Status.temper = g_Peref.temper.output;
 //----------- тест памяти---------------------------------  
 
   switch (memtemp)
@@ -186,5 +236,52 @@ Uns CircleBufferCalc(Uns input)
     }
     return result;
 }
+
+void peref_TemperObserverUpdate(TTempObserver *p)
+{
+	static Int i=0;
+
+        if (p->input <= p->dots[0].adc) 
+        {
+              p->output = p->dots[0].proc; 
+              return;
+        } 
+          
+
+        if (p->input >= p->dots[DOTS-1].adc)
+        {
+             p->output = p->dots[DOTS-1].proc;
+             return;
+        } 
+          
+         
+        
+	// Определяем, между какими значениями dots находится R_входное
+	//while (! ((p->inputR >= p->dots[i].resist)&&(p->inputR < p->dots[i+1].resist)) )	// Для сопротивления (прямая зависимость)
+	while (! ((p->input >= p->dots[i].adc)&&(p->input <= p->dots[i+1].adc)) )	// Для АЦП (обратная зависимость)
+	{
+		if (p->input > p->dots[i].adc)
+		{
+			i++;	// Движемся по характеристике вверх и вниз
+			//if(i > 7) i = 7;
+		}
+		else
+		{
+			i--;
+		//	if(i < -1) i = -1;
+		}							// пока не окажемся между двумя точками
+	}
+	
+	if (i > DOTS) i = DOTS;
+	else if (i < 0) i = 0;
+
+	if (p->input == p->dots[i].adc)			// Если четко попали на точку
+		p->output = p->dots[i].proc;		// берем значение температуры этой точки
+	else// Линейная интерполяция			   в противном случае интерполируем
+		p->output = LinearInterpolation(p->dots[i].adc, p->dots[i].proc ,p->dots[i+1].adc ,p->dots[i+1].proc, p->input);
+}
+
+
+
 
 

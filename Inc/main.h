@@ -49,7 +49,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-#define VERSION 23.11.20
+#define VERSION 25.11.20
 
 #define HZ					10e3		// Частота основного прерывания RTOS
 #define PRD_2KHZ				2000		// Периодическая задача 2000 Гц
@@ -123,7 +123,7 @@ void emptyFunc(void);
 #define V30_ON_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 extern I2C_HandleTypeDef hi2c1;
-
+extern ADC_HandleTypeDef hadc;
 extern RTC_TimeTypeDef Time;
 extern RTC_DateTypeDef Date;
 /* USER CODE END Private defines */

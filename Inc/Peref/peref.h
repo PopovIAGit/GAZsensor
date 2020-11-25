@@ -26,11 +26,11 @@ typedef struct {
 
 //---------------------------------------------------------------------
 typedef struct {
-	TDot						dots[DOTS];	// Массив точек для интерполяции
+	TDot						dots[DOTS];	        // Массив точек для интерполяции
 	Uns					        input;		        // Вход: АЦП 
 	Uns						output;	                // Выход: интерполированная величина
 	Bool						fault;		        // Флаг сбоя 
-} TLineObserver;
+} TTempObserver;
 
 typedef struct {
 
@@ -41,7 +41,7 @@ typedef struct {
         // RTC---------------------------------------------------------------------------------------
     
         //--------------------------
-      
+        TTempObserver temper;
         // переменные-----------------------------------------------------------------------------------------
         Uns Btn1;
         Uns Btn2;
@@ -66,6 +66,9 @@ void peref_Init(void);
 Bool peref_Refresh(void);
 void peref_ReadParams(void);
 void peref_RtcControl(void);
+
+void peref_TemperObserverInit(TTempObserver *);
+void peref_TemperObserverUpdate(TTempObserver *);
 
 //прототипы функций
 

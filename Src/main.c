@@ -92,11 +92,11 @@ int main(void)
   /* USER CODE BEGIN 1 */
   // tasks -------------------------------------------------------------------- 
   // displ - _ готово - дисплей битый
-  // menu - заготовка есть, подключить реальные числа
+  // menu - заготовка есть, подключить реальные числа, определиться с настройками
   // memory - 
   // btn - готово
   // IK - 
-  // TemperADC - 
+  // TemperADC - готово, снять поверхность 
   // TDC-GP30YA - 
   // modbus - 
   // jump (block factory param) - 
@@ -137,7 +137,9 @@ int main(void)
   peref_Init();
   Core_Init(&g_Core);
   
-  HAL_TIM_Base_Start_IT (&htim11);
+  HAL_TIM_Base_Start_IT (&htim11); // Включили Прерывания таймера 1 для РТОС
+  
+   HAL_ADC_Start(&hadc); // включили АЦП температуры
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -340,9 +342,9 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0;
+  /*sTime.Hours = 0;
   sTime.Minutes = 0;
-  sTime.Seconds = 0;
+  sTime.Seconds = 0;*/
   sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
   sTime.StoreOperation = RTC_STOREOPERATION_RESET;
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
