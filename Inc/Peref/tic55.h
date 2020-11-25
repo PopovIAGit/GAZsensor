@@ -11,6 +11,9 @@ void tic_print_char(unsigned char Char, unsigned char Pos, char dot, char set);
 void tic_print_symbol(int Data, unsigned char Pos);
 void tic_print_numful (unsigned int Num, unsigned char Pos);
 
+void tic_print_time (void);
+void tic_print_date (RTC_DateTypeDef *);
+
 extern unsigned int code[];
 
 #endif

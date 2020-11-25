@@ -96,6 +96,34 @@ void tic_print_numful (unsigned int Num, unsigned char Pos)
   tic_send();
 } 
 
+void tic_print_time (void)
+{
+
+  Buffer[0] = 480; //d
+  Buffer[1] = 0;
+  Buffer[2] = code[Time.Hours/10]; 
+  Buffer[3] = code[Time.Hours%10]+1; 
+  Buffer[4] = code[Time.Minutes/10]; 
+  Buffer[5] = code[Time.Minutes%10]+1; 
+  Buffer[6] = code[Time.Seconds/10]; 
+  Buffer[7] = code[Time.Seconds%10]; 
+    
+  tic_send();
+}
+
+void tic_print_date (RTC_DateTypeDef *date)
+{
+  Buffer[0] = 460; //t
+  Buffer[1] = 0;
+  Buffer[2] = code[date->Date/10]; 
+  Buffer[3] = code[date->Date%10]+1; 
+  Buffer[4] = code[date->Month/10]; 
+  Buffer[5] = code[date->Month%10]+1; 
+  Buffer[6] = code[date->Year/10]; 
+  Buffer[7] = code[date->Year%10]; 
+  
+  tic_send();
+}
 
 void tic_print_char(unsigned char Char, unsigned char Pos, char dot, char set)
 {

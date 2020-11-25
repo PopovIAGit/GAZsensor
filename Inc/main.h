@@ -123,6 +123,9 @@ void emptyFunc(void);
 #define V30_ON_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 extern I2C_HandleTypeDef hi2c1;
+
+extern RTC_TimeTypeDef Time;
+extern RTC_DateTypeDef Date;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

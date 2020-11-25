@@ -9,7 +9,13 @@
 
 typedef struct _TStatus
 {
-  TStatusReg            Status;            
+  TStatusReg            Status;
+  Uns                   volumeStandart;         // объем  стандартный 
+  Uns                   volumeWork;             // объем   рабочий
+  Uns                   volumePerDay;           // объем   за сутки
+  Uns                   expenditureStandart;    // расход стандартный
+  Uns                   expenditureWork;        // расход рабочий
+  Uns                   temper;
 }TStatus;
 
 typedef struct _TUserParam
