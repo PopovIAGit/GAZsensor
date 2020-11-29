@@ -138,13 +138,6 @@ void peref_10HzCalc(TPeref *p)//
         tic_control_off();   
  }
       
-  // mem test
- // FM24V10_Update(&g_Peref.Eeprom1);
-  
- 
-//  p->Btn1 = !HAL_GPIO_ReadPin(SB1_GPIO_Port, SB1_Pin);
-//  p->Btn2 = !HAL_GPIO_ReadPin(SB2_GPIO_Port, SB2_Pin);
-//  p->Btn3 = !HAL_GPIO_ReadPin(SB3_GPIO_Port, SB3_Pin);
   
   // BTN1        
   if (HAL_GPIO_ReadPin(SB1_GPIO_Port, SB1_Pin)==0)
@@ -196,7 +189,7 @@ void peref_ReadParams(void)
         if (IsMemParReady())
         { 
             addr = GetAdr(UserParam.Rsvd1);
-            count = SIZE(TUserParam)+SIZE(TFactoryParam);//sizeof(TUserParam)+ sizeof(TFactoryParam);
+            count = SIZE(TUserParam)+SIZE(TFactoryParam);
             ReadPar(addr, &g_Ram.UserParam.Rsvd1, count);
         }
 
