@@ -16,7 +16,7 @@
     uint16_t devAddrR = (0x51 << 1);
 
     uint16_t tmp= 0;
-uint8_t regData = 0;
+    uint8_t regData = 0;
 
 
 void FM24V10_Init(TFM24V10 *p)					// Инициализация

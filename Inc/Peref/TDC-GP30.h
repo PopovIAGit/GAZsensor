@@ -4,15 +4,17 @@
 #include "std.h"
 
 // Биты статусного регистра
-#define FM25V10_WEL    0x02
-#define FM25V10_BP0    0x04
-#define FM25V10_BP1    0x08
-#define FM25V10_WPEN   0x80
+//Opcodes 
+#define RC_RAA_WR_RAM 0x5A
+#define RC_RAA_RD_RAM 0x7A
+
+// Configuration Registers 
+#define CR_WD_DIS 0x0C0
 
 typedef struct {
 	Byte  SpiId;					// Идентификатор SPI канала (SPIA, SPIB, ...)
 	Uns   SpiBaud;					// Частота синхроимпульсов
-	unsigned long   Addr;			        // Адрес
+	Uns   Addr;			                // Адрес
 	Byte  Func;					// Функция
 	Uns   Count;					// Количество байт данных
 	Uns  *Buffer;					// Указатель на буфер данных Byte заменил на Uns

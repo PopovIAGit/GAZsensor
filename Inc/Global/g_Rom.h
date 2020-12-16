@@ -16,6 +16,7 @@ typedef struct _TStatus
   Uns                   expenditureStandart;    // расход стандартный
   Uns                   expenditureWork;        // расход рабочий
   Uns                   temper;
+  Uns                   vBat;
 }TStatus;
 
 typedef struct _TUserParam
