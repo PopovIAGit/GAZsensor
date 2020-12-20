@@ -99,13 +99,12 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**ADC GPIO Configuration
     PA0-WKUP1     ------> ADC_IN0
-    PA1     ------> ADC_IN1
     PB1     ------> ADC_IN9
     */
-    GPIO_InitStruct.Pin = ADC_TEMP_Pin|PEREM_Pin;
+    GPIO_InitStruct.Pin = ADC_TEMP_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(ADC_TEMP_GPIO_Port, &GPIO_InitStruct);
 
     GPIO_InitStruct.Pin = GPIO_PIN_1;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
@@ -137,10 +136,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 
     /**ADC GPIO Configuration
     PA0-WKUP1     ------> ADC_IN0
-    PA1     ------> ADC_IN1
     PB1     ------> ADC_IN9
     */
-    HAL_GPIO_DeInit(GPIOA, ADC_TEMP_Pin|PEREM_Pin);
+    HAL_GPIO_DeInit(ADC_TEMP_GPIO_Port, ADC_TEMP_Pin);
 
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_1);
 
@@ -287,7 +285,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     */
     GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
