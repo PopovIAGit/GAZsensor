@@ -1,197 +1,265 @@
 #include "peref.h"
 
-uint8_t dataTxFront[20];
-uint8_t dataRxFront[20];
-uint16_t sizeFront = 6; 
-uint8_t  AdresWrite = 0xC0;
-uint32_t dataWrite = 0x48DBA399 ; //
-uint8_t  dataReadAdr = 234; //SRR_ERR_FLAG  
-uint32_t dataRead = 0;
-uint32_t dataReadBuffer = 0;
-Uns tmpState = 0;
+Uns ReadAll = 0;
+
 void TDCGP30_Init(TDCGP30 *p)							// Инициализация
 {
-  p->State = 1;
+  p->State = 0;
 }
+
+uint32_t TDCGP30_Read(TDCGP30 *p)
+{
+            p->dataTxFront[1]= RC_RAA_RD_RAM;
+            p->dataTxFront[2]= p->dataReadAdr;
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+            HAL_Delay(1);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 2, 0x1000);
+            p->dataRxFront[0] = HAL_SPI_Receive  (&hspi1, &p->dataRxFront[0], 4, 0x1000);
+            HAL_Delay(1);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+            p->dataReadBuffer = p->dataRxFront[0];
+            p->dataRead = (p->dataReadBuffer<<24);
+            p->dataReadBuffer = p->dataRxFront[1];
+            p->dataRead |= (p->dataReadBuffer<<16);
+            p->dataReadBuffer = p->dataRxFront[2];
+            p->dataRead |= (p->dataReadBuffer<<8);
+            p->dataReadBuffer = p->dataRxFront[3];
+            p->dataRead |= (p->dataReadBuffer);
+            
+            return p->dataRead;
+}
+
+void TDCGP30_Write(TDCGP30 *p)
+{
+            p->dataTxFront[1]= RC_RAA_WR_RAM;
+            p->dataTxFront[2]= p->AdresWrite;
+            p->dataTxFront[3]=(p->dataWrite>>24)&0xff;
+            p->dataTxFront[4]=(p->dataWrite>>16)&0xff;
+            p->dataTxFront[5]=(p->dataWrite>>8)&0xff;
+            p->dataTxFront[6]=(p->dataWrite)&0xff;
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+            HAL_Delay(1);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 7, 0x1000);
+            HAL_Delay(1);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+}
+
+
+void TDCGP30_ReadAll(TDCGP30 *p)
+{
+  switch (p->State++)
+  {
+  case 0:
+    p->dataReadAdr = 0x0C0;
+    p->CR_WD_DIS.all = TDCGP30_Read(p);
+    break;
+  case 1:
+    p->dataReadAdr = 0x0C1;
+    p->CR_PI_E2C.all = TDCGP30_Read(p);
+    break;
+  case 2:
+    p->dataReadAdr = 0x0C2;
+    p->CR_GP_CTRL.all = TDCGP30_Read(p);
+    break;
+  case 4:
+    p->dataReadAdr = 0x0C3;
+    p->CR_UART.all = TDCGP30_Read(p);
+    break;
+  case 5:
+    p->dataReadAdr = 0x0C4;
+    p->CR_IEH.all = TDCGP30_Read(p);
+    break;
+  case 6:
+    p->dataReadAdr = 0x0C5;
+    p->CR_CPM.all = TDCGP30_Read(p);
+    break;
+  case 7:
+    p->dataReadAdr = 0x0C6;
+    p->CR_MRG_TS.all = TDCGP30_Read(p);
+    break;
+  case 8:
+    p->dataReadAdr = 0x0C7;
+    p->CR_TM.all = TDCGP30_Read(p);
+    break;
+  case 9:
+    p->dataReadAdr = 0x0C8;
+    p->CR_TM.all = TDCGP30_Read(p);
+    break;
+  case 10:
+    p->dataReadAdr = 0x0C9;
+    p->CR_USM_FRC.all = TDCGP30_Read(p);
+    break;
+  case 11:
+    p->dataReadAdr = 0x0CA;
+    p->CR_USM_TOF.all = TDCGP30_Read(p);
+    break;
+  case 12:
+    p->dataReadAdr = 0x0CB;
+    p->CR_USM_AM.all = TDCGP30_Read(p);
+    break;
+  case 13:
+    p->dataReadAdr = 0x0CC;
+    p->CR_TRIM1.all = TDCGP30_Read(p);
+    break;
+  case 14:
+    p->dataReadAdr = 0x0CD;
+    p->CR_TRIM2.all = TDCGP30_Read(p);
+    break;
+    
+  case 15:
+    p->dataReadAdr = 0x0CE;
+    p->CR_TRIM3.all = TDCGP30_Read(p);
+    break;
+  case 16:
+    p->dataReadAdr = 0x0D0  ;
+    p->SHR_TOF_RATE.all   = TDCGP30_Read(p);
+    break;
+  case 17:
+    p->dataReadAdr = 0x0D3  ;
+    p->SHR_GPO.all   = TDCGP30_Read(p);
+    break;
+  case 18:
+    p->dataReadAdr = 0x0D4  ;
+    p->SHR_PI_NPULSE.all   = TDCGP30_Read(p);
+    break;
+  case 19:
+    p->dataReadAdr = 0x0D5;
+    p->SHR_PI_TPA.all  = TDCGP30_Read(p);
+    break;
+  case 20:
+    p->dataReadAdr = 0x0D6 ;
+    p->SHR_PI_IU_TIME.all  = TDCGP30_Read(p);
+    break;
+  case 21:
+    p->dataReadAdr = 0x0D7;
+    p->SHR_PI_IU_NO.all   = TDCGP30_Read(p);
+    break;
+  case 22:
+    p->dataReadAdr = 0x0D8;
+    p->SHR_TOF_START_HIT_DLY.all = TDCGP30_Read(p);
+    break;
+  case 23:
+    p->dataReadAdr = 0x0D9;
+    p->SHR_ZCD_LVL.all    = TDCGP30_Read(p);
+    break;
+  case 24:
+    p->dataReadAdr = 0x0DA;
+    p->SHR_FHL_U.all      = TDCGP30_Read(p);
+    break;
+  case 25:
+    p->dataReadAdr = 0x0DB;
+    p->SHR_FHL_D.all     = TDCGP30_Read(p);
+    break;
+  case 26:
+    p->dataReadAdr = 0x0DC;
+    p->SHR_CPU_REQ.all     = TDCGP30_Read(p);
+    break;
+  case 27:
+    p->dataReadAdr = 0x0DD;
+    p->SHR_EXC.all     = TDCGP30_Read(p);
+    break;
+  case 28:
+    p->dataReadAdr = 0x0DE;
+    p->SHR_RC.all    = TDCGP30_Read(p);
+    break;
+  case 29:
+    p->dataReadAdr = 0x0DF;
+    p->SHR_FW_TRANS_EN.all  = TDCGP30_Read(p);
+    break;
+  case 30:
+    p->dataReadAdr = 0x0E0;
+    p->SRR_ERR_FLAG.all   = TDCGP30_Read(p);
+    break;
+  case 31:
+    p->dataReadAdr = 0x0E1;
+    p->SRR_ERR_FLAG.all  = TDCGP30_Read(p);
+    break;
+  case 32:
+    p->dataReadAdr = 0x0E2;
+    p->SRR_FEP_STF.all   = TDCGP30_Read(p);
+    break;
+  case 33:
+    p->dataReadAdr = 0x0E3;
+    p->SRR_GPI.all   = TDCGP30_Read(p);
+    break;
+  case 34:
+    p->dataReadAdr = 0x0E4;
+    p->SRR_HCC_VAL.all   = TDCGP30_Read(p);
+    break;
+  case 35:
+    p->dataReadAdr = 0x0E5;
+    p->SRR_VCC_VAL.all = TDCGP30_Read(p);
+    break;
+  case 36:
+    p->dataReadAdr = 0x0E6;
+    p->SRR_TS_HOUR.all   = TDCGP30_Read(p);
+    break;
+  case 37:
+    p->dataReadAdr = 0x0E7;
+    p->SRR_TS_MIN_SEC.all   = TDCGP30_Read(p);
+    break;
+  case 38:
+    p->dataReadAdr = 0x0E8;
+    p->SRR_TOF_CT.all   = TDCGP30_Read(p);
+    break;
+  case 39:
+    p->dataReadAdr = 0x0E9;
+    p->SRR_TS_TIME.all  = TDCGP30_Read(p);
+    break;
+  case 40:
+    p->dataReadAdr = 0x0EA;
+    p->SRR_MSC_STF.all  = TDCGP30_Read(p);
+    break;
+  case 41:
+    p->dataReadAdr = 0x0EB;
+    p->SRR_E2P_RD.all = TDCGP30_Read(p);
+    break;
+  case 42:
+    p->dataReadAdr = 0x0EC;
+    p->SRR_FWU_RNG.all = TDCGP30_Read(p);
+    break;
+  case 43:
+    p->dataReadAdr = 0x0ED;
+    p->SRR_FWU_REV.all = TDCGP30_Read(p);
+    break;
+  case 44:
+    p->dataReadAdr = 0x0EE;
+    p->SRR_FWA_REV.all = TDCGP30_Read(p);
+    break;
+  case 45:
+    p->dataReadAdr = 0x0EF;
+    p->SRR_LSC_CV.all = TDCGP30_Read(p);
+    p->State = 0;
+    break;
+  }
+}
+
 void TDCGP30_Update(TDCGP30 *p)
 {
-  switch (p->State)
-	{
-          case 0: break; // empty
-          case 1://read
-            dataTxFront[1]= RC_RAA_RD_RAM;
-            dataTxFront[2]= dataReadAdr;
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
-            HAL_Delay(1);
-            dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &dataTxFront[1], 2, 0x1000);
-            dataRxFront[0] = HAL_SPI_Receive  (&hspi1, &dataRxFront[0], 4, 0x1000);
-            HAL_Delay(1);
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
-            dataReadBuffer = dataRxFront[0];
-            dataRead = (dataReadBuffer<<24);
-            dataReadBuffer = dataRxFront[1];
-            dataRead |= (dataReadBuffer<<16);
-            dataReadBuffer = dataRxFront[2];
-            dataRead |= (dataReadBuffer<<8);
-            dataReadBuffer = dataRxFront[3];
-            dataRead |= (dataReadBuffer);
-          break;
-          case 2: // write
-            sizeFront=6;
-            dataTxFront[1]= RC_RAA_WR_RAM;
-            dataTxFront[2]= AdresWrite;
-            dataTxFront[3]=(dataWrite>>24)&0xff;
-            dataTxFront[4]=(dataWrite>>16)&0xff;
-            dataTxFront[5]=(dataWrite>>8)&0xff;
-            dataTxFront[6]=(dataWrite)&0xff;
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
-            HAL_Delay(1);
-            dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &dataTxFront[1], 6, 0x1000);
-            HAL_Delay(1);
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
-            p->State = tmpState;
-          break;
-        case 3:
-          AdresWrite = 0xC0;
-          dataWrite = 0xAF0A7435;
-          tmpState = 4;
-          p->State = 2;
-          break;
-        case 4:
-          AdresWrite = 0xC1;
-          dataWrite = 0x0034310A;
-          tmpState = 5;
-          p->State = 2;
-          break;
-        case 5:
-          AdresWrite = 0xC2;
-          dataWrite = 0x81111144;
-          tmpState = 6;
-          p->State = 2;
-          break;
-        case 6:
-          AdresWrite = 0xC3;
-          dataWrite = 0x00001000 ;
-          tmpState = 7;
-          p->State = 2;
-          break;
-        case 7:
-          AdresWrite = 0xC4;
-          dataWrite = 0x011F03FF ;
-          tmpState = 8;
-          p->State = 2;
-          break;
-        case 8:
-          AdresWrite = 0xC5;
-          dataWrite = 0x00280AE8 ;
-          tmpState = 9;
-          p->State = 2;
-          break;
-        case 9:
-          AdresWrite = 0xC6;
-          dataWrite = 0x00280AE8 ;
-          tmpState = 10;
-          p->State = 2;
-          break;
-        case 10:
-          AdresWrite = 0xC7;
-          dataWrite = 0x00F99400 ;
-          tmpState = 11;
-          p->State = 2;
-          break;
-        case 11:
-          AdresWrite = 0xC8;
-          dataWrite = 0x00002824 ;
-          tmpState = 12;
-          p->State = 2;
-          break;
-        case 12:
-          AdresWrite = 0xC9;
-          dataWrite = 0x03E48C83  ;
-          tmpState = 13;
-          p->State = 2;
-          break;
-        case 13:
-          AdresWrite = 0xCA;
-          dataWrite = 0x00000C10  ;
-          tmpState = 14;
-          p->State = 2;
-          break;
-        case 14:
-          AdresWrite = 0xCB;
-          dataWrite = 0x0000DE81;
-          tmpState = 15;
-          p->State = 2;
-          break;
-        case 15:
-          AdresWrite = 0xCC;
-          dataWrite = 0x84A0C47C  ;
-          tmpState = 16;
-          p->State = 2;
-          break;
-        case 16:
-          AdresWrite = 0xCD;
-          dataWrite = 0x401700CF;
-          tmpState = 17;
-          p->State = 2;
-          break;
-        case 17:
-          AdresWrite = 0xCE;
-          dataWrite = 0x00270808;
-          tmpState = 18;
-          p->State = 2;
-          break;
-        case 18:
-          AdresWrite = 0xD0;
-          dataWrite = 0x00000001;
-          tmpState = 19;
-          p->State = 2;
-          break;
-        case 19:
-          AdresWrite = 0xD8;
-          dataWrite = 0x00000000;
-          tmpState = 20;
-          p->State = 2;
-          break;
-        case 20:
-          AdresWrite = 0xDA;
-          dataWrite = 0x00000055 ;
-          tmpState = 21;
-          p->State = 2;
-          break;
-        case 21:
-          AdresWrite = 0xDB;
-          dataWrite = 0x00000055;
-          tmpState = 1;
-          p->State = 2;
-          break;
-        }
-    // normal cod
+  switch (ReadAll)
+  {
+  case 0: // empty
     
-  /*switch (++p->State)
-	{
-          case 1: // Disable Watchdog
-            WD_DIS  
-            HAL_SPI_TransmitReceive(&hspi1, dataTxFront, dataRxFront, sizeFront, 0x1000);
-           
-          break;
-          case 2:
-            
-          break;
-        }*/
-/*     dataTxFront[1] = RC_RAA_RD_RAM;
+    break; 
+  case 1: // write
+    TDCGP30_Write(p);
+    break; 
     
-     if (t1 >= 15)
-       t1 = 0;
-        else t1+5;
-       dataTxFront[2] = 0xE0 + t1;
-  
-     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
-     HAL_Delay(1);
-     dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &dataTxFront[1], 5, 0x1000);
-     dataRxFront[0] = HAL_SPI_Receive  (&hspi1, &huinia[1+t1], 5, 0x1000);
-     HAL_Delay(1);
-     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);*/
-     
+  case 2:       // readall
+    TDCGP30_ReadAll(p);
+    break;
     
+  case 3: 
+    TDCGP30_Read(p);
+    break; 
+  case 4: // reset all
+    p->dataTxFront[1]= RC_SYS_RST;
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+    HAL_Delay(1);
+    p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 1, 0x1000);
+    HAL_Delay(1);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+    ReadAll = 0;
+    break;
+  }
 }
