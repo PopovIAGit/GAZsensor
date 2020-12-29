@@ -80,7 +80,7 @@ void emptyFunc(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int a = 0;
-
+Uns on30 = 0;
 /* USER CODE END 0 */
 
 /**
@@ -132,7 +132,7 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_GPIO_WritePin (V30_ON_GPIO_Port, V30_ON_Pin, 1); // on 30V
+  HAL_GPIO_WritePin (V30_ON_GPIO_Port, V30_ON_Pin, 0); // on 30V
        
   peref_Init();
   Core_Init(&g_Core);
@@ -157,8 +157,9 @@ int main(void)
           Time = sTime;
           HAL_RTC_GetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN);
           Date = DateToUpdate;
-    
-    TDCGP30_Update(&g_Peref.Front);
+   
+          HAL_GPIO_WritePin (V30_ON_GPIO_Port, V30_ON_Pin, on30);
+  //  
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

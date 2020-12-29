@@ -13,11 +13,16 @@
 #define RC_SV_INIT      0x9C 
 #define RC_FEP_INIT     0x9D 
 
+#define RC_MT_REQ      0xDA
+
+#define RC_MCT_ON       0x8B
+#define RC_MCT_OFF      0x8A
+
 //Configuration Registers___________________________________________________________________________________
 typedef union _TCR_WD_DIS { //0x0C0  Watchdog Disable 
 	uint32_t all;
 	struct {
-		uint32_t WD_DIS:32;		// 0:31 // Enable 0xAF0A7435    // Disable   0x48DBA399
+		uint32_t WD_DIS:32;		// 0:31    // Disable   0x48DBA399
 	} bit;
 }TCR_WD_DIS;
 
@@ -61,8 +66,8 @@ typedef union _TCR_GP_CTRL { //0x0C2  General Purpose Control
 typedef union _TCR_UART    { //0x0C3  UART Interface  
 	uint32_t all;
 	struct {
-		uint32_t UART_DATA_MSG_LEN :3;		// 0:3 
-                uint32_t UART_DATA_MSG_ADR :3;		// 4:7 
+		uint32_t UART_DATA_MSG_LEN :4;		// 0:3 
+                uint32_t UART_DATA_MSG_ADR :4;		// 4:7 
                 uint32_t UART_IRQ_CLR_MODE:1;		// 8 
                 uint32_t UART_HB_MODE:1;		        // 9 
                 uint32_t UART_HBR:2;		        // 10:11 
@@ -472,7 +477,7 @@ typedef union _TSRR_VCC_VAL   { //0x0E5  VCC Value
 	uint32_t all;
 	struct {
 		uint32_t VCC_VAL:6;		// 0:5   
-                uint32_t FW_TRANS_EN:26;	// 6:31 
+                uint32_t Rsvd:26;	// 6:31 
 	} bit;
 } TSRR_VCC_VAL;
 

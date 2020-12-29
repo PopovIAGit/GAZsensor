@@ -1,6 +1,7 @@
 #include "peref.h"
 
 Uns ReadAll = 0;
+uint8_t taskData = 4;
 
 void TDCGP30_Init(TDCGP30 *p)							// Инициализация
 {
@@ -12,10 +13,11 @@ uint32_t TDCGP30_Read(TDCGP30 *p)
             p->dataTxFront[1]= RC_RAA_RD_RAM;
             p->dataTxFront[2]= p->dataReadAdr;
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
-            HAL_Delay(1);
+          //  HAL_Delay(1);
             p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 2, 0x1000);
-            p->dataRxFront[0] = HAL_SPI_Receive  (&hspi1, &p->dataRxFront[0], 4, 0x1000);
-            HAL_Delay(1);
+        //    HAL_Delay(1);
+            p->dataTxFront[0] = HAL_SPI_Receive  (&hspi1, &p->dataRxFront[0], 4, 0x1000);
+        //    HAL_Delay(1);
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
             p->dataReadBuffer = p->dataRxFront[0];
             p->dataRead = (p->dataReadBuffer<<24);
@@ -37,10 +39,17 @@ void TDCGP30_Write(TDCGP30 *p)
             p->dataTxFront[4]=(p->dataWrite>>16)&0xff;
             p->dataTxFront[5]=(p->dataWrite>>8)&0xff;
             p->dataTxFront[6]=(p->dataWrite)&0xff;
+
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
-            HAL_Delay(1);
-            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 7, 0x1000);
-            HAL_Delay(1);
+        //    HAL_Delay(1);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 1, 0x1000);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[2], 1, 0x1000);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[3], 1, 0x1000);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[4], 1, 0x1000);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[5], 1, 0x1000);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[6], 1, 0x1000);
+            p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[7], 1, 0x1000);
+        //    HAL_Delay(5);
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
 }
 
@@ -255,11 +264,160 @@ void TDCGP30_Update(TDCGP30 *p)
   case 4: // reset all
     p->dataTxFront[1]= RC_SYS_RST;
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
-    HAL_Delay(1);
+    //   HAL_Delay(1);
     p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 1, 0x1000);
-    HAL_Delay(1);
+    //   HAL_Delay(1);
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
     ReadAll = 0;
+    break;
+  case 5:
+    p->CR_WD_DIS.all = 0x48DBA399;      //
+    p->AdresWrite = 0xC0;
+    p->dataWrite = p->CR_WD_DIS.all;
+    TDCGP30_Write(p);
+    
+    p->CR_GP_CTRL.all = 1275855052;/// ot kuda eto gavno - 1276907980??????;//1074794752;//out
+    p->AdresWrite = 0xC2;  
+    p->dataWrite = p->CR_GP_CTRL.all;
+    TDCGP30_Write(p);
+    
+    p->CR_UART.all = 0x00001000;//
+    p->AdresWrite = 0xC3;  
+    p->dataWrite = p->CR_UART.all;
+    TDCGP30_Write(p);
+    
+    p->CR_IEH.all = 0x011F03FF;//
+    p->AdresWrite = 0xC4;  
+    p->dataWrite = p->CR_IEH.all;
+    TDCGP30_Write(p);
+    
+    p->CR_CPM .all = 5837716;//
+    p->AdresWrite = 0xC5;  
+    p->dataWrite = p->CR_CPM.all;
+    TDCGP30_Write(p);
+    
+    p->CR_MRG_TS.all = 78485;//
+    p->AdresWrite = 0xC6;  
+    p->dataWrite = p->CR_MRG_TS.all;
+    TDCGP30_Write(p);
+        
+    p->CR_USM_PRC.all = 2;//
+    p->AdresWrite = 0xC8;  
+    p->dataWrite = p->CR_USM_PRC.all;
+    TDCGP30_Write(p);
+    
+    p->CR_USM_FRC.all = 125899285;//127472149;
+    p->AdresWrite = 0xC9;  
+    p->dataWrite = p->CR_USM_FRC.all;
+    TDCGP30_Write(p);
+    
+    p->CR_USM_TOF.all = 4756;
+    p->AdresWrite = 0x0CA;  
+    p->dataWrite = p->CR_USM_TOF.all;
+    TDCGP30_Write(p);
+    
+    p->CR_USM_AM.all = 3584;
+    p->AdresWrite = 0x0CB;  
+    p->dataWrite = p->CR_USM_AM.all;
+    TDCGP30_Write(p);
+    
+    p->CR_TRIM1.all =  0x84A0C47C;
+    p->AdresWrite = 0x0CC;  
+    p->dataWrite = p->CR_TRIM1.all;
+    TDCGP30_Write(p);
+    
+    p->CR_TRIM2.all =  0x401700CF;
+    p->AdresWrite = 0x0CD;  
+    p->dataWrite = p->CR_TRIM1.all;
+    TDCGP30_Write(p);
+    
+    p->CR_TRIM3.all =  0x00270808;
+    p->AdresWrite = 0x0CE;  
+    p->dataWrite = p->CR_TRIM1.all;
+    TDCGP30_Write(p);
+    break;
+      case 6:
+     p->dataTxFront[1]= RC_MCT_ON;
+     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+     p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 1, 0x1000);
+     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+    break;
+    
+      case 7:
+     p->dataTxFront[1]= RC_MCT_OFF;
+     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+     p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 1, 0x1000);
+     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+    break;
+
+  case 8:
+     p->dataTxFront[1]= RC_MT_REQ;
+     p->dataTxFront[2]= taskData;
+     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+     p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 2, 0x1000);
+     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+    break;
+    
+    
+     case 10:
+             p->AdresWrite = 0xC0;  
+             p->dataWrite = 0x48DBA399;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC1;  
+             p->dataWrite = 0x0034310A;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC2;  
+             p->dataWrite = 0x81111144;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC3;  
+             p->dataWrite = 0x00001000;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC4;  
+             p->dataWrite = 0x011F03FF;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC5;  
+             p->dataWrite = 0x280BE8;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC6;  
+             p->dataWrite = 0x00016080;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC7;  
+             p->dataWrite = 0x00F99400;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC8;  
+             p->dataWrite = 0x00002824;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xC9;  
+             p->dataWrite = 0x03E48C83;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xCA;  
+             p->dataWrite = 0x00000C10;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xCB;  
+             p->dataWrite = 0x0000DE81;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xCC;  
+             p->dataWrite = 0x84A0C47C;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xCD;  
+             p->dataWrite = 0x401700CF;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xCE;  
+             p->dataWrite = 0x00270808;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xD0;  
+             p->dataWrite =  0x00000001;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xD8;  
+             p->dataWrite = 0x00000000;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xDA;  
+             p->dataWrite = 0x00000055;
+             TDCGP30_Write(p);
+             p->AdresWrite = 0xDB;  
+             p->dataWrite = 0x00000055;
+             TDCGP30_Write(p);
+             ReadAll =0;
     break;
   }
 }

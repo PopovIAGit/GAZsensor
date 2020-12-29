@@ -137,10 +137,14 @@ void peref_18KHzCalc(TPeref *p)//
 void peref_2KHzCalc(TPeref *p)
 {
  // 
+ 
 }
 
 void peref_50HzCalc(TPeref *p)
 { 
+  MAX5419_Update(&p->Potenc);
+  
+   TDCGP30_Update(&g_Peref.Front);
   //--------температура------------------------
   g_Peref.temper.input = HAL_ADC_GetValue(&hadc);
   peref_TemperObserverUpdate(&g_Peref.temper);
