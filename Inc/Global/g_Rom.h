@@ -17,6 +17,10 @@ typedef struct _TStatus
   Uns                   expenditureWork;        // расход рабочий
   Uns                   temper;
   Uns                   vBat;
+  Uns                   CRC16;
+  Uns                   factory_nb;
+  Uns                   enter_nb;
+  Uns                   errors;
 }TStatus;
 
 typedef struct _TUserParam

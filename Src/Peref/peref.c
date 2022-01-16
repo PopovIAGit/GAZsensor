@@ -6,12 +6,17 @@
 
 #include "peref.h"
 
+#define AUTO_CONFIG 0
+#define COSA 1;
+
 TPeref g_Peref;
 
 uint16_t memtemp = 0;
 uint16_t addr = 0;
 uint16_t addrstatus = 0;
 uint16_t count = 0;
+
+uint16_t ConfigTimerGP30 = 5*PRD_10HZ;
 
 
 // Точки 		  Температура.  АЦП.            темпер.    №
@@ -122,11 +127,12 @@ void peref_Init(void)
   MAX5419_Init(&g_Peref.Potenc);
   //---front
   TDCGP30_Init(&g_Peref.Front);
+  //----flow
+  g_Peref.Flow.cosA = COSA;
   // var---------------------------------
   g_Ram.UserParam.Rsvd1 = 0;
   //---------------------------
  
-
 }
 
 void peref_18KHzCalc(TPeref *p)//
@@ -136,15 +142,14 @@ void peref_18KHzCalc(TPeref *p)//
 
 void peref_2KHzCalc(TPeref *p)
 {
- // 
- 
+
 }
 
 void peref_50HzCalc(TPeref *p)
 { 
-  MAX5419_Update(&p->Potenc);
+
   
-   TDCGP30_Update(&g_Peref.Front);
+  
   //--------температура------------------------
   g_Peref.temper.input = HAL_ADC_GetValue(&hadc);
   peref_TemperObserverUpdate(&g_Peref.temper);
@@ -183,6 +188,23 @@ void peref_50HzCalc(TPeref *p)
 
 void peref_10HzCalc(TPeref *p)//
 {
+#if AUTO_CONFIG
+  if (--ConfigTimerGP30 > 2)
+  {
+    if (ConfigTimerGP30 > 3*PRD_10HZ) ReadAll = 4;
+    else  ReadAll = 5;
+  }
+  else 
+  {
+    ConfigTimerGP30 = 1;
+      ReadAll = 8;
+      on30 = 1;
+  }
+#endif
+  
+   TDCGP30_Update(&g_Peref.Front);
+   MAX5419_Update(&p->Potenc);
+  
  if (g_Ram.TestParam.TestMode && g_Ram.TestParam.DisplTest) // displ test
  {
         tic_control_on();

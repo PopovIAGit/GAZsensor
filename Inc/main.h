@@ -91,6 +91,8 @@ void emptyFunc(void);
 #define DE_485_GPIO_Port GPIOC
 #define ADC_TEMP_Pin GPIO_PIN_0
 #define ADC_TEMP_GPIO_Port GPIOA
+#define INTN_DIR_Pin GPIO_PIN_3
+#define INTN_DIR_GPIO_Port GPIOA
 #define LCD_LOAD_Pin GPIO_PIN_4
 #define LCD_LOAD_GPIO_Port GPIOA
 #define WP_FRAM_Pin GPIO_PIN_2
@@ -125,6 +127,7 @@ extern ADC_HandleTypeDef hadc;
 extern RTC_TimeTypeDef Time;
 extern RTC_DateTypeDef Date;
 extern SPI_HandleTypeDef hspi1;
+extern Uns on30;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

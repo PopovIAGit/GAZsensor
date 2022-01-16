@@ -143,7 +143,7 @@ typedef union _TCR_MRG_TS    { //0x0C6  Measure Rate Generator & Task Sequencer
                 uint32_t SetToZero:3;		// 17:19 
                 uint32_t TS_CST:3;		// 20:22 
                 uint32_t TS_START_MODE:1;	// 23 
-                uint32_t Rsvd:1;		// 0:31 
+                uint32_t Rsvd:8;		// 0:31 
 	} bit;
 } TCR_MRG_TS;
 
@@ -172,7 +172,7 @@ typedef union _TCR_USM_PRC    { //0x0C8  USM: Processing
                 uint32_t USM_DIR_MODE:2;	// 4:5 
                 uint32_t SetToZero:2;		// 6:7 
                 uint32_t USM_NOISE_MASK_WIN:8;	// 8:15 
-                uint32_t USM_TO:1;		// 16:17 
+                uint32_t USM_TO:2;		// 16:17 
                 uint32_t Rsvd2:14;		// 18:31 
 	} bit;
 } TCR_USM_PRC;
@@ -636,6 +636,8 @@ typedef struct {
         TSRR_FWA_REV    SRR_FWA_REV;
         TSRR_LSC_CV     SRR_LSC_CV;
 } TDCGP30, *pTDCGP30;
+
+extern Uns ReadAll;
 
 void TDCGP30_Init(TDCGP30 *);							// Инициализация
 void TDCGP30_Update(TDCGP30 *);							//

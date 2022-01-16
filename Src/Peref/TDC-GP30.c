@@ -1,7 +1,12 @@
 #include "peref.h"
 
-Uns ReadAll = 0;
-uint8_t taskData = 4;
+extern float decode(uint16_t float16_value);
+
+Uns             ReadAll = 0;
+uint8_t         taskData = 4;
+uint8_t         tmpAdrWrite = 0;
+uint32_t        tmpDataWrite = 0;
+uint16_t        tmpTimerWrite = 0;
 
 void TDCGP30_Init(TDCGP30 *p)							// Инициализация
 {
@@ -53,7 +58,7 @@ void TDCGP30_Write(TDCGP30 *p)
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
 }
 
-
+uint32_t poebenj[24], time1, time2, time1frac, time2frac;
 void TDCGP30_ReadAll(TDCGP30 *p)
 {
   switch (p->State++)
@@ -92,7 +97,7 @@ void TDCGP30_ReadAll(TDCGP30 *p)
     break;
   case 9:
     p->dataReadAdr = 0x0C8;
-    p->CR_TM.all = TDCGP30_Read(p);
+    p->CR_USM_PRC.all = TDCGP30_Read(p);
     break;
   case 10:
     p->dataReadAdr = 0x0C9;
@@ -251,7 +256,21 @@ void TDCGP30_Update(TDCGP30 *p)
     
     break; 
   case 1: // write
-    TDCGP30_Write(p);
+    if (tmpTimerWrite++ < 1*PRD_10HZ)
+    {
+        p->AdresWrite       = tmpAdrWrite;
+        p->dataWrite        = tmpDataWrite;
+        TDCGP30_Write(p);
+    }
+    else 
+    {
+        ReadAll = 8;
+        tmpTimerWrite = 0;
+        tmpAdrWrite = 0;
+        tmpDataWrite = 0;
+    }
+
+    
     break; 
     
   case 2:       // readall
@@ -291,7 +310,7 @@ void TDCGP30_Update(TDCGP30 *p)
     p->dataWrite = p->CR_IEH.all;
     TDCGP30_Write(p);
     
-    p->CR_CPM .all = 5837716;//
+    p->CR_CPM .all = 5837460;//  5837716;//
     p->AdresWrite = 0xC5;  
     p->dataWrite = p->CR_CPM.all;
     TDCGP30_Write(p);
@@ -301,17 +320,17 @@ void TDCGP30_Update(TDCGP30 *p)
     p->dataWrite = p->CR_MRG_TS.all;
     TDCGP30_Write(p);
         
-    p->CR_USM_PRC.all = 2;//
+    p->CR_USM_PRC.all = 131076;//
     p->AdresWrite = 0xC8;  
     p->dataWrite = p->CR_USM_PRC.all;
     TDCGP30_Write(p);
     
-    p->CR_USM_FRC.all = 125899285;//127472149;
+    p->CR_USM_FRC.all = 0x794852d;//0x7948532;//0x7948528;//132415656;//132418815;//132418768;
     p->AdresWrite = 0xC9;  
     p->dataWrite = p->CR_USM_FRC.all;
     TDCGP30_Write(p);
     
-    p->CR_USM_TOF.all = 4756;
+    p->CR_USM_TOF.all = 1540;//13246;
     p->AdresWrite = 0x0CA;  
     p->dataWrite = p->CR_USM_TOF.all;
     TDCGP30_Write(p);
@@ -328,13 +347,25 @@ void TDCGP30_Update(TDCGP30 *p)
     
     p->CR_TRIM2.all =  0x401700CF;
     p->AdresWrite = 0x0CD;  
-    p->dataWrite = p->CR_TRIM1.all;
+    p->dataWrite = p->CR_TRIM2.all;
     TDCGP30_Write(p);
     
     p->CR_TRIM3.all =  0x00270808;
     p->AdresWrite = 0x0CE;  
-    p->dataWrite = p->CR_TRIM1.all;
+    p->dataWrite = p->CR_TRIM3.all;
     TDCGP30_Write(p);
+    
+        p->SHR_FHL_U.all =  0x0000055;
+    p->AdresWrite = 0xDA;  
+    p->dataWrite = p->SHR_FHL_U.all;
+    TDCGP30_Write(p);
+    
+    
+        p->SHR_FHL_D.all =  0x0000055;
+    p->AdresWrite = 0xDB;  
+    p->dataWrite = p->SHR_FHL_D.all;
+    TDCGP30_Write(p);
+    
     break;
       case 6:
      p->dataTxFront[1]= RC_MCT_ON;
@@ -356,8 +387,35 @@ void TDCGP30_Update(TDCGP30 *p)
      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
      p->dataTxFront[0] = HAL_SPI_Transmit (&hspi1, &p->dataTxFront[1], 2, 0x1000);
      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+     
+     p->dataReadAdr = 0x0E1;
+     p->SRR_ERR_FLAG.all  = TDCGP30_Read(p);
+     
+     //p->dataReadAdr = 0x0E2;
+     //p->SRR_FEP_STF.all   = TDCGP30_Read(p);
+     
+     p->dataReadAdr = 0x0E8;
+     p->SRR_TOF_CT.all   = TDCGP30_Read(p);
+     uint8_t g;
+     for (g = 0; g<24; g++)
+     {
+       p->dataReadAdr = 0x80 + g;
+       poebenj[g] = TDCGP30_Read(p);
+     }
+     
+     g_Peref.Flow.HCC32 =  p->SRR_HCC_VAL.all;
+     g_Peref.Flow.HCC16 =  p->SRR_HCC_VAL.all >> 16;
+     
+     g_Peref.Flow.t1 = ((poebenj[0] >> 16) / 4) - ((1000 / (4000 / 45)) * 5);
+     g_Peref.Flow.t2 = ((poebenj[4] >> 16) / 4) - ((1000 / (4000 / 45)) * 5);
+     g_Peref.Flow.dt = g_Peref.Flow.t1 - g_Peref.Flow.t2;
+     g_Peref.Flow.F = ((3,14 * pow(g_Peref.Flow.D, 2) * g_Peref.Flow.K) / 4) * 
+                      ((g_Peref.Flow.C * g_Peref.Flow.dt) / (2 * g_Peref.Flow.L));
+     time1 = (poebenj[0] >> 16) * 250;
     break;
-    
+  case 9:
+    g_Peref.Flow.C = pow((2 * g_Peref.Flow.L * 1000) / ( (g_Peref.Flow.t1 + g_Peref.Flow.t2) / 1000), 2);
+   break; 
     
      case 10:
              p->AdresWrite = 0xC0;  

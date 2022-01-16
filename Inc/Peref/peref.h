@@ -46,6 +46,20 @@ typedef struct {
 } TBtnObserver;
 
 typedef struct {
+        float HCC32;
+        float32 HCC16;
+        float F;
+        Uns D;
+        float K;
+        Uns dt;
+        float C;
+        Uns L;
+        float t1;
+        float t2;
+        Uns cosA;
+}flow;
+        
+typedef struct {
 
         // Память------------------------------------------------------------------------------------
           TFM24V10                Eeprom1;
@@ -59,6 +73,7 @@ typedef struct {
         TTempObserver temper;
         TTempObserver vBat;
         Uns IsParamCangeEnable;
+        flow Flow;
         // переменные-----------------------------------------------------------------------------------------
         TBtnObserver Btn1;
         TBtnObserver Btn2;
