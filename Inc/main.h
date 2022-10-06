@@ -49,7 +49,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-#define VERSION 25.11.20
+#define VERSION 20.12.20
 
 #define HZ					10e3		// Частота основного прерывания RTOS
 #define PRD_2KHZ				2000		// Периодическая задача 2000 Гц
@@ -91,8 +91,8 @@ void emptyFunc(void);
 #define DE_485_GPIO_Port GPIOC
 #define ADC_TEMP_Pin GPIO_PIN_0
 #define ADC_TEMP_GPIO_Port GPIOA
-#define PEREM_Pin GPIO_PIN_1
-#define PEREM_GPIO_Port GPIOA
+#define INTN_DIR_Pin GPIO_PIN_3
+#define INTN_DIR_GPIO_Port GPIOA
 #define LCD_LOAD_Pin GPIO_PIN_4
 #define LCD_LOAD_GPIO_Port GPIOA
 #define WP_FRAM_Pin GPIO_PIN_2
@@ -126,6 +126,8 @@ extern I2C_HandleTypeDef hi2c1;
 extern ADC_HandleTypeDef hadc;
 extern RTC_TimeTypeDef Time;
 extern RTC_DateTypeDef Date;
+extern SPI_HandleTypeDef hspi1;
+extern Uns on30;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

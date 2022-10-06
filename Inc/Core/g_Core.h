@@ -56,6 +56,122 @@ Outputs
 	((CanBeReseted<<1)|(Level<<3)|(Bit<<4)|(Hyst<<8))
           
 //-------------------- Структуры -------------------------------------------
+// Группа menu
+typedef enum {
+	mlVolume                = 1,			// объем
+	mlExpenditure           = 2,			// расход
+	mlTemper                = 3,			// температура газа
+	mlNumber                = 4,			// номер устройства
+        mlErr                   = 5,                    // кол ошибок
+        mlCrc                   = 6,                    // црц прошивки
+        mlPar                   = 7,                    // колличесвто обращений к параметрам и переход в меню настроек
+        mlTime                  = 8,                    // дата
+	mlDate                  = 9			// время
+} TMenuLvl;
+
+typedef enum {
+	smlForm                 = 1,			// формуляр
+	smlDate                 = 2,			// параметры
+	smlLine                 = 3,			// линеаризхация
+	smlGrad                 = 4,			// градуировка
+        smlTdc                  = 5,                    // параметры тдс
+        smlTime                 = 6,                    // параметры времени
+        smlSig                  = 7,                    // сигнал?????
+        smlArh                  = 8,                    // архив - пароль 2
+	smlOut                  = 9                     // выход на уровень выше
+} TSubParamMenuLvl;
+
+typedef enum {
+	fmlNum                  = 1,			// 
+	fmlType                 = 2,			// 
+	fmlDate                 = 3,			// 
+	fmlCRC1                 = 4,			// 
+        fmlCRC2                 = 5,                    //
+        fmlVesion               = 6,                    // 
+        fmlDateInWork           = 7,                    // 
+        fmlAddr                 = 8,                    // 
+	fmlSpeed                = 9,                     //
+        fmlOut
+} TFormParamMenuLvl;
+
+typedef enum {
+	datCena                 = 1,			// 
+	datDlina                = 2,			// 
+	datDiam1                = 3,			// 
+	datDiam2                = 4,			// 
+        datOtstup1              = 5,                    //
+        datOtstup2              = 6,                    // 
+        datPause1               = 7,                    // 
+        datPause2               = 8,                    // 
+        datSpeedMin             = 9,                    //
+        datSpeedMax             = 10,                    //
+	datOut                  = 11                     // 
+} TDataParamMenuLvl;
+
+typedef enum {
+	lmlRashodQ0                 = 1,			// 
+        lmlMpyQ0                 = 2,			// 
+	lmlRashodQ1                 = 3,			// 
+	lmlMpyQ1                 = 4,			// 
+        lmlRashodQ2                  = 5,                    //
+        lmlMpyQ2                 = 6,                    // 
+        lmlRashodQ3                  = 7,                    // 
+        lmlMpyQ3                  = 8,                    // 
+        lmlRashodQ4                 = 9,			// 
+        lmlMpyQ4                 = 10,			// 
+	lmlRashodQ5                 = 11,			// 
+	lmlMpyQ5                 = 12,			// 
+        lmlRashodQ6                  = 13,                    //
+        lmlMpyQ6                 = 14,                    // 
+        lmlRashodQ7                  = 15,                    // 
+        lmlMpyQ7                  = 16,                    // 
+        lmlRashodQ8                 = 17,			// 
+        lmlMpyQ8                 = 18,			// 
+	lmlRashodQ9                 = 19,			// 
+	lmlMpyQ9                 = 20,			// 
+	lmlOut                  = 21                     // 
+} TLineParamMenuLvl;
+
+typedef enum {
+	gmlPass2                 = 1,			// 
+	gmlStart                 = 2,			// 
+	gmlCalibCycl             = 3,			// 
+	gmlEndOfCalib            = 4,			// 
+        gmlNullPause             = 5,                    //
+        gmlTimAbove              = 6,                    // 
+        gmlTimeForvard           = 7,                    // 
+        gmlCalibTemper           = 8,                    // 
+        gmlPauseAbove            = 9, 
+        gmlPauseForvard          = 10, 
+	gmlOut                   = 11                     // 
+} TGradParamMenuLvl;
+/* У нас другая микросхема
+typedef enum {
+	tdcmlNumImp                 = 1,			// 
+	tdcmlDelFreq                 = 2,			// 
+	tdcmlMpyPGA                 = 3,			// 
+        tdcmlLvl                 = 4,			// 
+        tdcml                  = 5,                    //
+        tdcmlTime                 = 6,                    // 
+        tdcmlSig                  = 7,                    // 
+        tdcmlArh                  = 8,                    //        
+	tdcmlGrad                 = 9,			// 
+        tdcmlTdc                  = 10,                    //
+        tdcmlTime                 = 11,                    // 
+        tdcmlSig                  = 12,                    //       
+	tdcmlOut                  = 13                     // 
+} TTDCParamMenuLvl;
+*/
+typedef enum {
+	tmlPoyas                 = 1,			// 
+	tmlSummerTime            = 2,			// 
+	tmlCheakTime             = 3,			// 
+	tmlPoyasCheakTime        = 4,			// 
+        tmlDate                  = 5,                    //
+        tmlTime                  = 6,                    // 
+	tsmlOut                  = 7                     // 
+} TTimeParamMenuLvl;
+
 
 //================== ЯДРО ============================
 
@@ -65,9 +181,24 @@ typedef struct {
 	// ---
 	TStatusReg 			Status;			// Статус работы
 	// ---
-    
-        Uns                             MenuLvl;
-        Uns                             MenuSublvl;
+        TMenuLvl                        MenuLvl;                // уровень основное меню
+        Uns                             MenuSublvl;             // саб уровень для основного меню
+        Uns                             ParamMenuFlag;          // переход в режим отображения саб меню
+        Uns                             EnterParamFlag;
+        TSubParamMenuLvl                SubParamMenuLvl;        // Меню параметров
+        TFormParamMenuLvl               FormParamMenuLvl;
+        TDataParamMenuLvl               DataParamMenuLvl;
+        TLineParamMenuLvl               LineParamMenuLvl;
+        TGradParamMenuLvl               GradParamMenuLvl;
+      //  TTDCParamMenuLvl                TDCParamMenuLvl;  У нас другая микросхема - сбда надо настройки для нашей
+        TTimeParamMenuLvl               TimeParamMenuLvl;
+        
+        
+        Uns                             Pass[4];
+        Uns                             PassNum;
+        Uns                             PassAll;
+        Uns                             PassReadyFlag;
+
 } TCore;
 
 void Core_Init(TCore *);
@@ -75,6 +206,13 @@ void Core_Init(TCore *);
 void core18kHZupdate(void);
 void core200HZupdate(void);
 void coreMenu(void);
+void coreSubMenu(void);
+void coreDataMenu(void);
+void coreFormMenu(void);
+void coreLineMenu(void);
+void coreGradMenu(void);
+void coreTimeMenu(void); 
+
 
 extern TCore g_Core;
 #endif // CORE_

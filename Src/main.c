@@ -51,7 +51,6 @@ SPI_HandleTypeDef hspi1;
 TIM_HandleTypeDef htim11;
 
 IRDA_HandleTypeDef hirda1;
-UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
@@ -70,7 +69,6 @@ static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM11_Init(void);
 static void MX_USART1_IRDA_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
@@ -80,6 +78,8 @@ void emptyFunc(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int a = 0;
+Uns on30 = 0;
+Uns Intn = 0;
 
 /* USER CODE END 0 */
 
@@ -93,14 +93,15 @@ int main(void)
   // tasks -------------------------------------------------------------------- 
   // displ - _ готово - дисплей битый
   // menu - заготовка есть, подключить реальные числа, определиться с настройками
-  // memory - 
+  // memory - ready test
   // btn - готово
   // IK - 
   // TemperADC - готово, снять поверхность 
-  // TDC-GP30YA - 
+  // TDC-GP30YA - ready
   // modbus - 
   // jump (block factory param) - 
   // RTC - готово, выведено
+  // potenc MAX - ready
   // end tasks-----------------------------------------------------------------
   /* USER CODE END 1 */
 
@@ -127,12 +128,11 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM11_Init();
   MX_USART1_IRDA_Init();
-  MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_GPIO_WritePin (V30_ON_GPIO_Port, V30_ON_Pin, 1); // on 30V
+  HAL_GPIO_WritePin (V30_ON_GPIO_Port, V30_ON_Pin, 0); // on 30V
        
   peref_Init();
   Core_Init(&g_Core);
@@ -140,6 +140,9 @@ int main(void)
   HAL_TIM_Base_Start_IT (&htim11); // Включили Прерывания таймера 1 для РТОС
   
    HAL_ADC_Start(&hadc); // включили АЦП температуры
+   g_Peref.Flow.L = 100;
+   g_Peref.Flow.K = 1;
+   g_Peref.Flow.D = 10;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -157,8 +160,11 @@ int main(void)
           Time = sTime;
           HAL_RTC_GetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN);
           Date = DateToUpdate;
-    
-    
+   
+          HAL_GPIO_WritePin (V30_ON_GPIO_Port, V30_ON_Pin, on30);
+          
+          Intn = HAL_GPIO_ReadPin(INTN_DIR_GPIO_Port,INTN_DIR_Pin);
+  //  
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -387,9 +393,9 @@ static void MX_SPI1_Init(void)
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -475,39 +481,6 @@ static void MX_USART1_IRDA_Init(void)
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
-}
-
-/**
   * @brief USART3 Initialization Function
   * @param None
   * @retval None
@@ -559,6 +532,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(DE_485_GPIO_Port, DE_485_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, LCD_LOAD_Pin|IRDA_SD_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -571,6 +547,27 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(DE_485_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : INTN_DIR_Pin SB1_Pin */
+  GPIO_InitStruct.Pin = INTN_DIR_Pin|SB1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LCD_LOAD_Pin IRDA_SD_Pin */
   GPIO_InitStruct.Pin = LCD_LOAD_Pin|IRDA_SD_Pin;
@@ -595,12 +592,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : SB1_Pin */
-  GPIO_InitStruct.Pin = SB1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(SB1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SB2_Pin SB3_Pin */
   GPIO_InitStruct.Pin = SB2_Pin|SB3_Pin;

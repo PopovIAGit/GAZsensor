@@ -4,7 +4,7 @@
 #include "std.h"
 
 typedef struct {
-	Byte  SpiId;					// 
+	Byte  Data[2];					// 
 } MAX5419, *pMAX5419;
 
 void MAX5419_Init(MAX5419 *);							// Инициализация

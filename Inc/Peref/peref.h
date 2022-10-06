@@ -8,7 +8,7 @@
 #include "tic55.h"
 // Макросы
 
-#define BTN_TIME (0.5 * PRD_10HZ)
+
 
 
 //==========Функция линейной интерполяции==============================
@@ -34,6 +34,32 @@ typedef struct {
 	Bool						fault;		        // Флаг сбоя 
 } TTempObserver;
 
+
+#define BTN_SHORT_TIME  (0.5 * PRD_10HZ)
+#define BTN_LONG_TIME   (2.0 * PRD_10HZ)
+
+typedef struct {
+        Uns Input;
+        Uns BtnTimer;
+        Uns OutputShort;
+        Uns OutputLong;
+} TBtnObserver;
+
+typedef struct {
+        float HCC32;
+        float32 HCC16;
+        float F;
+        Uns D;
+        float K;
+        float dt;
+        float C;
+        Uns L;
+        float V;
+        float t1;
+        float t2;
+        Uns cosA;
+}flow;
+        
 typedef struct {
 
         // Память------------------------------------------------------------------------------------
@@ -46,13 +72,13 @@ typedef struct {
         TDCGP30 Front;  
         MAX5419 Potenc;
         TTempObserver temper;
+        TTempObserver vBat;
+        Uns IsParamCangeEnable;
+        flow Flow;
         // переменные-----------------------------------------------------------------------------------------
-        Uns Btn1;
-        Uns Btn2;
-        Uns Btn3;
-        Uns btn1Timer;
-        Uns btn2Timer;
-        Uns btn3Timer;
+        TBtnObserver Btn1;
+        TBtnObserver Btn2;
+        TBtnObserver Btn3;
         Bool                    RamUpdFlag;
          
 } TPeref;
@@ -71,11 +97,13 @@ Bool peref_Refresh(void);
 void peref_ReadParams(void);
 void peref_RtcControl(void);
 
+void peref_BtnObsreverUpdate(TBtnObserver *);
+
 void peref_TemperObserverInit(TTempObserver *);
+void peref_vBatObserverInit(TTempObserver *);
 void peref_TemperObserverUpdate(TTempObserver *);
 
 //прототипы функций
-
 void peref_EEPROM_Func(Byte Memory, Byte Func,	Uns Addr, Uns *Data, Uns Count);
 void peref_10HzCalc(TPeref *);
 void peref_50HzCalc(TPeref *);

@@ -148,6 +148,8 @@ void tic_set_char(unsigned char Data, unsigned char Pos, char dot, char set)
     Buffer[Pos] = code[Data-54]+i;  
 }
 
+      
+
 
 void tic_send(void)
 {   

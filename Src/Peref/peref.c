@@ -6,12 +6,17 @@
 
 #include "peref.h"
 
+#define AUTO_CONFIG 0
+#define COSA 1;
+
 TPeref g_Peref;
 
 uint16_t memtemp = 0;
 uint16_t addr = 0;
 uint16_t addrstatus = 0;
 uint16_t count = 0;
+
+uint16_t ConfigTimerGP30 = 5*PRD_10HZ;
 
 
 // Точки 		  Температура.  АЦП.            темпер.    №
@@ -50,7 +55,41 @@ TDot dots[DOTS] = {	        0,      744,		//  4		0
                                 1000,   3785};		//  20  16		
 //--------------------------------------------------------
 
-
+// Точки 		  Температура.  АЦП.            темпер.    №
+TDot dots_vBat[DOTS] = {	        0,      744,		//  4		0
+                                31,     842,            //  4.5
+                                62,     940,		//  5		1
+                                93,     1040,           //  5.5
+                                125,    1136,		//  6		2
+                                156,    1232,           //  6.5
+                                187,    1330,		//  7		3
+                                218,    1425,           //  7.5
+                                250,    1520,		//  8	        4
+                                281,    1614,           //  8.5
+                                312,    1710,		//  9	        5
+                                343,    1803,           //  9.5
+                                375,    1898,		//  10	        6
+                                406,    1993,           //  10.5
+                                437,    2085,		//  11          7
+                                468,    2183,           //  11.5
+                                500,    2276,		//  12          8
+                                531,    2373,           //  12.5
+                                562,    2465,		//  13  9
+                                593,    2560,           //  13.5
+                                625,    2655,		//  14  10
+                                656,    2751,           //  14.5
+                                687,    2845,		//  15  11
+                                718,    2939,           //  15.5
+                                750,    3033,		//  16  12
+                                781,    3128,           //  16.5
+                                812,    3221,		//  17  13
+                                843,    3317,           //  17.5
+                                875,    3409,		//  18  14
+                                906,    3506,           //  18.5
+                                937,    3598,		//  19  15
+                                968,    3695,           //  19.5
+                                1000,   3785};		//  20  16		
+//--------------------------------------------------------
 void peref_TemperObserverInit(TTempObserver *p)
 {
                 int i = 0;
@@ -61,21 +100,39 @@ void peref_TemperObserverInit(TTempObserver *p)
 		 }              
 }
 
+void peref_vBatObserverInit(TTempObserver *p)
+{
+                int i = 0;
+
+		 for (i = 0; i<DOTS; i++)
+		 {
+			p->dots[i] = dots_vBat[i];
+		 }              
+}
+
 void peref_Init(void)
 {	 
   // Память------------------------------------------------------------------------------------
   FM24V10_Init(&g_Peref.Eeprom1);
-  // Дисплей-----------------------------------------------------------------------------------
+  // Дисплей-----очищение---------------------------------------------------------------------------
   tic_control_on();
   tic_clear();
   HAL_Delay (1);
   tic_control_off();
-  // Часы---------------------------------------------------------------------------------------
+  // датчик температуры
   peref_TemperObserverInit(&g_Peref.temper);
+  // измерение напряжения батарейки
+  peref_TemperObserverInit(&g_Peref.vBat);
+  // потенцометр
+  MAX5419_Init(&g_Peref.Potenc);
+  //---front
+  TDCGP30_Init(&g_Peref.Front);
+  //----flow
+  g_Peref.Flow.cosA = COSA;
   // var---------------------------------
+  g_Ram.UserParam.Rsvd1 = 0;
   //---------------------------
  
-  g_Ram.UserParam.Rsvd1 = 0;
 }
 
 void peref_18KHzCalc(TPeref *p)//
@@ -85,16 +142,23 @@ void peref_18KHzCalc(TPeref *p)//
 
 void peref_2KHzCalc(TPeref *p)
 {
- 
+
 }
 
 void peref_50HzCalc(TPeref *p)
 { 
+
+  
+  
+  //--------температура------------------------
   g_Peref.temper.input = HAL_ADC_GetValue(&hadc);
   peref_TemperObserverUpdate(&g_Peref.temper);
   g_Ram.Status.temper = g_Peref.temper.output;
+  //--------напряжение батарейки----------------
+  g_Peref.vBat.input = HAL_ADC_GetValue(&hadc); // Подвязать нужное АЦП!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  peref_TemperObserverUpdate(&g_Peref.vBat);
+  g_Ram.Status.vBat = g_Peref.vBat.output;
 //----------- тест памяти---------------------------------  
-
   switch (memtemp)
   {
   case 0:  break;
@@ -115,7 +179,6 @@ void peref_50HzCalc(TPeref *p)
         addr = GetAdr(UserParam.Rsvd1);
         count = SIZE(TUserParam)+SIZE(TFactoryParam)+SIZE(TComands)+SIZE(TTestParam);
         ReadPar(addr, &g_Ram.UserParam.Rsvd1, count);
-        
       }
     }
     break; 
@@ -125,6 +188,23 @@ void peref_50HzCalc(TPeref *p)
 
 void peref_10HzCalc(TPeref *p)//
 {
+#if AUTO_CONFIG
+  if (--ConfigTimerGP30 > 2)
+  {
+    if (ConfigTimerGP30 > 3*PRD_10HZ) ReadAll = 4;
+    else  ReadAll = 5;
+  }
+  else 
+  {
+    ConfigTimerGP30 = 1;
+      ReadAll = 8;
+      on30 = 1;
+  }
+#endif
+  
+   TDCGP30_Update(&g_Peref.Front);
+   MAX5419_Update(&p->Potenc);
+  
  if (g_Ram.TestParam.TestMode && g_Ram.TestParam.DisplTest) // displ test
  {
         tic_control_on();
@@ -137,10 +217,18 @@ void peref_10HzCalc(TPeref *p)//
         
         tic_control_off();   
  }
-      
+  //--------------------------------------------------------
+  // BTN-------------------------------------       
   
-  // BTN1        
-  if (HAL_GPIO_ReadPin(SB1_GPIO_Port, SB1_Pin)==0)
+  p->Btn1.Input = HAL_GPIO_ReadPin(SB1_GPIO_Port, SB1_Pin);
+  peref_BtnObsreverUpdate(&p->Btn1);
+  p->Btn2.Input = HAL_GPIO_ReadPin(SB2_GPIO_Port, SB2_Pin);
+  peref_BtnObsreverUpdate(&p->Btn1);
+  p->Btn3.Input = HAL_GPIO_ReadPin(SB3_GPIO_Port, SB3_Pin);
+  peref_BtnObsreverUpdate(&p->Btn1);
+ 
+ 
+/* if (HAL_GPIO_ReadPin(SB1_GPIO_Port, SB1_Pin)==0)
   {
     if (p->btn1Timer++ >= BTN_TIME)
     {
@@ -181,8 +269,37 @@ void peref_10HzCalc(TPeref *p)//
   {
       p->Btn3 = 0;
       p->btn3Timer = 0;
+  }*/
+ 
+ //---------------------------------------- 
+// p->IsParamCangeEnable = !HAL_GPIO_ReadPin(PEREM_GPIO_Port, PEREM_Pin); // Флаг разрешения смены параметров, обратный от значения джамепера
+}
+
+
+void peref_BtnObsreverUpdate(TBtnObserver *p)
+{
+  if (p->Input == 0)
+  {
+    p->BtnTimer++;
+  }
+  else
+  {
+     if (p->BtnTimer >= BTN_SHORT_TIME)
+     {
+        p->OutputShort = 1;
+        p->OutputLong = 0;
+     }
+     
+     if (p->BtnTimer >= BTN_LONG_TIME)
+     {
+        p->OutputShort = 0;
+        p->OutputLong = 1;
+     }
+     
+     p->BtnTimer = 0;
   }
 }
+
 
 void peref_ReadParams(void)
 {
