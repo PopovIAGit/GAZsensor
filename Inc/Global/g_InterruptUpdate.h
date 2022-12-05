@@ -60,6 +60,7 @@ TPeriodicalFunction Task2kHz[] =          //Не более 8-х задач
 
 TPeriodicalFunction Task200Hz[] =       	//не более  20-ти задач
 {
+    PrdElemInit(peref_200HzCalc,                 &g_Peref)
     PrdElemInit(core200HZupdate,                NULL)
 };
 
@@ -67,14 +68,16 @@ TPeriodicalFunction Task200Hz[] =       	//не более  20-ти задач
 
 TPeriodicalFunction Task50Hz[] =        //не более  80-ти задач
 {
-    PrdElemInit(peref_50HzCalc,                 &g_Peref)
+  PrdElemInit(core50HZupdate,                 &g_Core),  
+  PrdElemInit(peref_50HzCalc,                 &g_Peref)
 };
 
 // ================================ 10 vц ==================================
 
 TPeriodicalFunction Task10Hz[] =        //не более  200-т задач
 {  
-    PrdElemInit(peref_10HzCalc,                 &g_Peref)
+  PrdElemInit(core10HZupdate,                 &g_Core), 
+  PrdElemInit(peref_10HzCalc,                 &g_Peref)
 };
 //------------†конец файла-----------------------------------------------
 

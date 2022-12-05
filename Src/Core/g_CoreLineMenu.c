@@ -27,26 +27,26 @@ if(g_Peref.Btn3.OutputShort)              // backward
 
 switch (g_Core.LineParamMenuLvl){
 
-  case lmlRashodQ0:  EmptyFunc3();           break;
-  case lmlMpyQ0: EmptyFunc3();           break;
-  case lmlRashodQ1: EmptyFunc3();           break;
-  case lmlMpyQ1: EmptyFunc3();           break;
-  case lmlRashodQ2: EmptyFunc3();         break;
-  case lmlMpyQ2: EmptyFunc3();         break;
-  case lmlRashodQ3: EmptyFunc3();          break;
-  case lmlMpyQ3: EmptyFunc3();          break;
-  case lmlRashodQ4: EmptyFunc3();        break;
-  case lmlMpyQ4: EmptyFunc3();        break;
-  case lmlRashodQ5: EmptyFunc3();        break;
-  case lmlMpyQ5: EmptyFunc3();        break;
-  case lmlRashodQ6: EmptyFunc3();        break;
-  case lmlMpyQ6: EmptyFunc3();        break;
-  case lmlRashodQ7: EmptyFunc3();        break;
-  case lmlMpyQ7: EmptyFunc3();        break;
-  case lmlRashodQ8: EmptyFunc3();        break;
-  case lmlMpyQ8: EmptyFunc3();        break;
-  case lmlRashodQ9: EmptyFunc3();        break;
-  case lmlMpyQ9: EmptyFunc3();        break;
+  case lmlRashodQ0:     EmptyFunc3();        break;
+  case lmlMpyQ0:        EmptyFunc3();        break;
+  case lmlRashodQ1:     EmptyFunc3();        break;
+  case lmlMpyQ1:        EmptyFunc3();        break;
+  case lmlRashodQ2:     EmptyFunc3();        break;
+  case lmlMpyQ2:        EmptyFunc3();        break;
+  case lmlRashodQ3:     EmptyFunc3();        break;
+  case lmlMpyQ3:        EmptyFunc3();        break;
+  case lmlRashodQ4:     EmptyFunc3();        break;
+  case lmlMpyQ4:        EmptyFunc3();        break;
+  case lmlRashodQ5:     EmptyFunc3();        break;
+  case lmlMpyQ5:        EmptyFunc3();        break;
+  case lmlRashodQ6:     EmptyFunc3();        break;
+  case lmlMpyQ6:        EmptyFunc3();        break;
+  case lmlRashodQ7:     EmptyFunc3();        break;
+  case lmlMpyQ7:        EmptyFunc3();        break;
+  case lmlRashodQ8:     EmptyFunc3();        break;
+  case lmlMpyQ8:        EmptyFunc3();        break;
+  case lmlRashodQ9:     EmptyFunc3();        break;
+  case lmlMpyQ9:        EmptyFunc3();        break;
   case lmlOut: 
     if(g_Peref.Btn2.OutputShort)              // enter
     {

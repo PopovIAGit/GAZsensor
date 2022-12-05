@@ -205,6 +205,13 @@ void Core_Init(TCore *);
 
 void core18kHZupdate(void);
 void core200HZupdate(void);
+void core50HZupdate(void);
+void core10HZupdate(void);
+Uns VolumeCalc(Uns RASHOD, Uns TimeExecute, float RashodToVolume);
+
+
+
+//--- MENUS--------
 void coreMenu(void);
 void coreSubMenu(void);
 void coreDataMenu(void);

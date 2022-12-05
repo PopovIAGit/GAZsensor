@@ -73,6 +73,7 @@ typedef struct {
         MAX5419 Potenc;
         TTempObserver temper;
         TTempObserver vBat;
+        TTempObserver RASHOD;
         Uns IsParamCangeEnable;
         flow Flow;
         // переменные-----------------------------------------------------------------------------------------
@@ -102,11 +103,14 @@ void peref_BtnObsreverUpdate(TBtnObserver *);
 void peref_TemperObserverInit(TTempObserver *);
 void peref_vBatObserverInit(TTempObserver *);
 void peref_TemperObserverUpdate(TTempObserver *);
+void peref_RASHODObserverInit(TTempObserver *);
+
 
 //прототипы функций
 void peref_EEPROM_Func(Byte Memory, Byte Func,	Uns Addr, Uns *Data, Uns Count);
 void peref_10HzCalc(TPeref *);
 void peref_50HzCalc(TPeref *);
+void peref_200HzCalc(TPeref *);
 void peref_18KHzCalc(TPeref *);
 void peref_2KHzCalc(TPeref *);
 

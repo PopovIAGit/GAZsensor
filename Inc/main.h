@@ -49,14 +49,14 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-#define VERSION 20.12.20
+#define VERSION 05.12.22
 
 #define HZ					10e3		// Частота основного прерывания RTOS
 #define PRD_2KHZ				2000		// Периодическая задача 2000 Гц
 #define PRD_200HZ				200			// Периодическая задача 200 Гц
 #define PRD_50HZ				50			// Периодическая задача 50 Гц
 #define PRD_10HZ				10			// Периодическая задача 10 Гц
-#define PRD_50HZ				50			// Периодическая задача 50 Гц
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

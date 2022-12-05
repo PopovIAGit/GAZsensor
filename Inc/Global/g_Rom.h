@@ -21,6 +21,7 @@ typedef struct _TStatus
   Uns                   factory_nb;
   Uns                   enter_nb;
   Uns                   errors;
+  Uns                   speed;
 }TStatus;
 
 typedef struct _TUserParam

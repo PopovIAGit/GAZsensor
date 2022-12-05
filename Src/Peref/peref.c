@@ -90,6 +90,45 @@ TDot dots_vBat[DOTS] = {	        0,      744,		//  4		0
                                 968,    3695,           //  19.5
                                 1000,   3785};		//  20  16		
 //--------------------------------------------------------
+
+// ЗАПОЛНЯТЬ ДЛЯ РАСЧЕТА РАССХОА + ДОБАВИТЬ ВОЗМОЖНОСТЬ КАЛИБРОВКИ
+// определиться сточками для снятия зависимости - 
+// Точки 		      РАСХОД.  СКОРОСТЬ.            темпер.   
+TDot dots_RASHOD[DOTS] = {	 0,     744,		//  4		
+                                31,     842,            //  4.5
+                                62,     940,		//  5		
+                                93,     1040,           //  5.5
+                                125,    1136,		//  6		
+                                156,    1232,           //  6.5
+                                187,    1330,		//  7		
+                                218,    1425,           //  7.5
+                                250,    1520,		//  8	        
+                                281,    1614,           //  8.5
+                                312,    1710,		//  9	        
+                                343,    1803,           //  9.5
+                                375,    1898,		//  10	        
+                                406,    1993,           //  10.5
+                                437,    2085,		//  11          
+                                468,    2183,           //  11.5
+                                500,    2276,		//  12          
+                                531,    2373,           //  12.5
+                                562,    2465,		//  13  9
+                                593,    2560,           //  13.5
+                                625,    2655,		//  14  10
+                                656,    2751,           //  14.5
+                                687,    2845,		//  15  11
+                                718,    2939,           //  15.5
+                                750,    3033,		//  16  12
+                                781,    3128,           //  16.5
+                                812,    3221,		//  17  13
+                                843,    3317,           //  17.5
+                                875,    3409,		//  18  14
+                                906,    3506,           //  18.5
+                                937,    3598,		//  19  15
+                                968,    3695,           //  19.5
+                                1000,   3785};		//  20  16		
+//--------------------------------------------------------
+
 void peref_TemperObserverInit(TTempObserver *p)
 {
                 int i = 0;
@@ -110,6 +149,16 @@ void peref_vBatObserverInit(TTempObserver *p)
 		 }              
 }
 
+void peref_RASHODObserverInit(TTempObserver *p)
+{
+                int i = 0;
+
+		 for (i = 0; i<DOTS; i++)
+		 {
+			p->dots[i] = dots_RASHOD[i];
+		 }              
+}
+
 void peref_Init(void)
 {	 
   // Память------------------------------------------------------------------------------------
@@ -123,6 +172,8 @@ void peref_Init(void)
   peref_TemperObserverInit(&g_Peref.temper);
   // измерение напряжения батарейки
   peref_TemperObserverInit(&g_Peref.vBat);
+   // измерение расхода
+  peref_TemperObserverInit(&g_Peref.RASHOD);
   // потенцометр
   MAX5419_Init(&g_Peref.Potenc);
   //---front
@@ -142,14 +193,21 @@ void peref_18KHzCalc(TPeref *p)//
 
 void peref_2KHzCalc(TPeref *p)
 {
+  // посчитли dt
+  TDCGP30_Update(&g_Peref.Front);   
+  g_Ram.Status.speed = (Uns)g_Peref.Flow.dt;
+}
 
+void peref_200HzCalc(TPeref *p)
+{  
+  //--------СЧИТАЕМ мгновенный РАХОД----------------
+  g_Peref.RASHOD.input = g_Ram.Status.speed;
+  peref_TemperObserverUpdate(&g_Peref.RASHOD);
+  g_Ram.Status.expenditureWork = g_Peref.RASHOD.output;
 }
 
 void peref_50HzCalc(TPeref *p)
 { 
-
-  
-  
   //--------температура------------------------
   g_Peref.temper.input = HAL_ADC_GetValue(&hadc);
   peref_TemperObserverUpdate(&g_Peref.temper);
@@ -202,7 +260,7 @@ void peref_10HzCalc(TPeref *p)//
   }
 #endif
   
-   TDCGP30_Update(&g_Peref.Front);
+  // TDCGP30_Update(&g_Peref.Front);
    MAX5419_Update(&p->Potenc);
   
  if (g_Ram.TestParam.TestMode && g_Ram.TestParam.DisplTest) // displ test
